@@ -1,14 +1,7 @@
-from tests.conftest import (
-    load_response,
-    v1_url,
-    habits_url,
-    todos_url,
-    users_url,
-    keys_match,
-    make_habit_dicts,
-)
 from datetime import date, timedelta
+
 from db.database import Habit
+from tests.conftest import habits_url, load_response, todos_url
 
 today = str(date.today())
 tmrw = str(date.today() + timedelta(days=1))
@@ -79,6 +72,8 @@ def test_weekly_habit(client, new_user):
     response = client.get(user_todos_url)
     assert response.status_code == 200
     loaded = response.get_json()
+    assert loaded
+
 
 def test_post_task(client, new_user):
     uid = new_user()
@@ -87,7 +82,7 @@ def test_post_task(client, new_user):
         "name": "write to do list",
         "originalScheduledDate": today,
         "currentScheduledDate": today,
-        "type": "task"
+        "type": "task",
     }
     response = client.post(user_todos_url, json=task_data)
     assert response.status_code == 200

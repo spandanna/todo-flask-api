@@ -1,7 +1,8 @@
-import inflection
+import datetime as dt
+import itertools
+
 from marshmallow import Schema, fields
-import uuid
-from datetime import datetime, date
+
 from db.database import Habit, ToDo
 
 
@@ -43,3 +44,26 @@ class ToDoSchema(Schema):
     class Meta:
         ordered = True
         model = ToDo
+
+
+def dump_todos(todo_objects, end_date):
+    todo_dicts = ToDoSchema(many=True, unknown="exclude").dump(todo_objects)
+    todo_dicts = list(sorted(todo_dicts, key=lambda x: x["currentScheduledDate"]))
+
+    daily_todo_dicts = itertools.groupby(
+        todo_dicts, key=lambda x: x["currentScheduledDate"]
+    )
+    result = {}
+    cur_date = dt.date.today()
+    for date, _todos in daily_todo_dicts:
+        while str(cur_date) != date:
+            result[str(cur_date)] = []
+            cur_date += dt.timedelta(days=1)
+
+        if str(cur_date) == date:
+            result[date] = list(_todos)
+            cur_date += dt.timedelta(days=1)
+
+    if not result.get(str(end_date)):
+        result[str(end_date)] = []
+    return result
