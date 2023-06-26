@@ -1,0 +1,10 @@
+flask
+requests
+pytest
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-RestX
+inflection
+flask-marshmallow
+marshmallow-sqlalchemy
+marshmallow
