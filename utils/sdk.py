@@ -13,7 +13,7 @@ class ToDoApp:
         user_id: int = None,
         name: str = None,
         url: str = "http://192.168.0.4:5000",
-        horizon: int = 0,
+        horizon: int = 7,
     ):
         if user_id:
             self.user_id = user_id
@@ -99,7 +99,7 @@ class ToDoApp:
     def new_task(self, name: str, do_date: str = None):
         if not do_date:
             do_date = str(dt.date.today())
-        body = {"name": name, "originalScheduledDate": do_date, "type": "task"}
+        body = {"name": name, "originalScheduledDate": do_date, "currentScheduledDate": do_date, "type": "task"}
         response = requests.post(self.todos_url, json=body)
         response.raise_for_status()
         self._set_todos()

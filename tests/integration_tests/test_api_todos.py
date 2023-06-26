@@ -79,3 +79,20 @@ def test_weekly_habit(client, new_user):
     response = client.get(user_todos_url)
     assert response.status_code == 200
     loaded = response.get_json()
+
+def test_post_task(client, new_user):
+    uid = new_user()
+    user_todos_url = todos_url.replace("<user_id>", str(uid))
+    task_data = {
+        "name": "write to do list",
+        "originalScheduledDate": today,
+        "currentScheduledDate": today,
+        "type": "task"
+    }
+    response = client.post(user_todos_url, json=task_data)
+    assert response.status_code == 200
+
+    response = client.get(user_todos_url)
+    assert response.status_code == 200
+    loaded = response.get_json()
+    assert len(loaded[today]) == 1
