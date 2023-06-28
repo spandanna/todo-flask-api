@@ -2,7 +2,7 @@ import datetime as dt
 
 from sqlalchemy import and_, func
 
-from db.database import Habit, ToDo
+from db.database import ToDo
 
 
 class Scheduler:
@@ -39,7 +39,7 @@ class Scheduler:
         ToDo.query.filter(
             ToDo.type == "task",
             ToDo.current_scheduled_date < self.today,
-            ToDo.done_date is None,
+            ToDo.done_date == None,  # noqa: E711
             ToDo.user_id == self.user_id,
         ).update({"current_scheduled_date": self.today})
         self.db.session.commit()
@@ -79,19 +79,3 @@ class Scheduler:
             .all()
         )
         return latest_scheduled_habits
-
-    @classmethod
-    def from_db(cls):
-        scheduler = cls()
-        scheduler._set_habits_from_db()
-        return scheduler
-
-    def _set_habits_from_db(self):
-        habits = Habit.query.all()
-        # habits = HabitSchema(many=True).dump(db_habits)
-        self.habits = habits
-        return self
-
-    # def _set_schedule_from_db(self):
-    #     db_schedules = Schedule.query.all()
-    #     self.schedules = db_schedules

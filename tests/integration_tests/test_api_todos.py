@@ -76,16 +76,20 @@ def test_weekly_habit(client, new_user):
 
 
 def test_post_task(client, new_user):
+    """
+    Creates a new task originally scheduled for yesterday.
+    Left undone since yesterday, it should be rescheduled for today.
+    """
     uid = new_user()
     user_todos_url = todos_url.replace("<user_id>", str(uid))
     task_data = {
         "name": "write to do list",
-        "originalScheduledDate": today,
-        "currentScheduledDate": today,
+        "originalScheduledDate": yday,
         "type": "task",
     }
     response = client.post(user_todos_url, json=task_data)
     assert response.status_code == 200
+    loaded = response.get_json()
 
     response = client.get(user_todos_url)
     assert response.status_code == 200

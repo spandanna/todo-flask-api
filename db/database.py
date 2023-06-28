@@ -1,7 +1,7 @@
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 import datetime as dt
-import uuid
+
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -74,6 +74,10 @@ class Habit(db.Model):
         return
 
 
+def default_current_scheduled_date(context):
+    return context.get_current_parameters()["original_scheduled_date"]
+
+
 class ToDo(db.Model):
     __tablename__ = "todos"
     id = db.Column(db.Integer, primary_key=True)
@@ -83,7 +87,9 @@ class ToDo(db.Model):
     original_scheduled_date = db.Column(
         db.Date()
     )  # when it was originally scheduled for
-    current_scheduled_date = db.Column(db.Date())  # current schedule date
+    current_scheduled_date = db.Column(
+        db.Date(), default=default_current_scheduled_date
+    )  # current schedule date
     done_date = db.Column(db.Date())  # when it was done
     habit_id = db.Column(db.Integer(), db.ForeignKey("habits.id"))
     habit = db.relationship("Habit", back_populates="scheduled", lazy=True)
