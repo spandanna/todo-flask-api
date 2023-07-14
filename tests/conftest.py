@@ -1,11 +1,13 @@
+import datetime as dt
 import json
-import pytest
-from factory.build import create_app
-from db.database import db, Habit, ToDo, User
 import random
 import string
 from typing import List
-import datetime as dt
+
+import pytest
+
+from db.database import Habit, ToDo, User, db
+from factory.build import create_app
 
 v1_url = "/api/v1"
 users_url = f"{v1_url}/users"
@@ -87,13 +89,14 @@ def make_habit_dicts(_uid, n: int = 3, contents: List[tuple] = None):
 def new_user_with_habits(_app, new_user):
     _uid = None
 
-    def inner(name: str = None, habit_dicts: dict = None):
+    def inner(name: str = None, habit_dicts: list = None):
         nonlocal _uid
         _uid = new_user(name)
         with _app.app_context():
             if not habit_dicts:
                 habit_dicts = make_habit_dicts(_uid=_uid)
-
+            else:
+                habit_dicts = [dict(d, user_id=_uid) for d in habit_dicts]
             habits = [Habit(**habit_dict) for habit_dict in habit_dicts]
 
             db.session.bulk_save_objects(habits)

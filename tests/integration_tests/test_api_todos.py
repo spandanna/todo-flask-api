@@ -41,7 +41,7 @@ def test_e2e(client, new_user_with_habits, _app):
     # this makes one less habit scheduled for today
     response = client.patch(
         f"{user_todos_url}/{first_habit_id}",
-        json={"currentScheduledDate": yday, "doneDate": yday},
+        json={"scheduledDate": yday, "doneDate": yday},
     )
     assert response.status_code == 204
     response = client.get(user_todos_url)
@@ -84,7 +84,7 @@ def test_post_task(client, new_user):
     user_todos_url = todos_url.replace("<user_id>", str(uid))
     task_data = {
         "name": "write to do list",
-        "originalScheduledDate": yday,
+        "scheduledDate": yday,
         "type": "task",
     }
     response = client.post(user_todos_url, json=task_data)

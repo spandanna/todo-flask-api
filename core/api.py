@@ -88,6 +88,13 @@ class habit(Resource):
         updates = HabitSchema(partial=True).load(body)
         Habit.query.filter(Habit.id == habit_id).update(updates)
         db.session.commit()
+        if updates.get("interval_value"):
+            Habit.query.get(habit_id).reschedule(from_date=dt.date.today())
+        elif updates.get("name"):
+            ToDo.query.filter(ToDo.habit_id == habit_id).update(
+                {"name": updates.get("name")}
+            )
+            db.session.commit()
         return make_response("", 204)
 
 
@@ -107,7 +114,7 @@ class todos(Resource):
         end_date = today + dt.timedelta(days=horizon)
 
         sched = Scheduler(user_id, db, end_date)
-        sched.reschedule()
+        sched.reschedule()  # TODO only reschedule if it needs to be rescheduled...
         current_todos = sched.get_todos()
 
         result = dump_todos(current_todos, end_date)

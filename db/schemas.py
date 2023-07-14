@@ -33,12 +33,12 @@ habit_schema = HabitSchema(unknown="exclude")
 
 class ToDoSchema(Schema):
     id = fields.Integer()
-    user_id = fields.Integer()
+    user_id = fields.Integer(data_key="userId")
     type = fields.String()
     name = fields.String()
     habit_id = fields.Integer(data_key="habitId", default=None)
     original_scheduled_date = fields.Date(data_key="originalScheduledDate")
-    current_scheduled_date = fields.Date(data_key="currentScheduledDate")
+    scheduled_date = fields.Date(data_key="scheduledDate", required=True)
     done_date = fields.Date(data_key="doneDate")
 
     class Meta:
@@ -48,11 +48,9 @@ class ToDoSchema(Schema):
 
 def dump_todos(todo_objects, end_date):
     todo_dicts = ToDoSchema(many=True, unknown="exclude").dump(todo_objects)
-    todo_dicts = list(sorted(todo_dicts, key=lambda x: x["currentScheduledDate"]))
+    todo_dicts = list(sorted(todo_dicts, key=lambda x: x["scheduledDate"]))
 
-    daily_todo_dicts = itertools.groupby(
-        todo_dicts, key=lambda x: x["currentScheduledDate"]
-    )
+    daily_todo_dicts = itertools.groupby(todo_dicts, key=lambda x: x["scheduledDate"])
     result = {}
     cur_date = dt.date.today()
     for date, _todos in daily_todo_dicts:

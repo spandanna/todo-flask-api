@@ -3,17 +3,10 @@ import datetime as dt
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
+from utils import utils
+
 db = SQLAlchemy()
 migrate = Migrate()
-
-
-def get_dates(start_date, interval, end_date):
-    dates = [start_date]
-    current_date = start_date
-    while current_date < end_date:
-        current_date += dt.timedelta(days=interval)
-        dates.append(current_date)
-    return dates
 
 
 class User(db.Model):
@@ -55,7 +48,9 @@ class Habit(db.Model):
             interval_value_days = self.interval_value
         elif self.interval_type == "week":
             interval_value_days = self.interval_value * 7
-        to_schedule_dates = get_dates(self.start_date, interval_value_days, end_date)
+        to_schedule_dates = utils.get_dates(
+            self.start_date, interval_value_days, end_date
+        )
 
         scheduled_habits = [
             ToDo(
@@ -64,7 +59,38 @@ class Habit(db.Model):
                 habit_id=self.id,
                 name=self.name,
                 original_scheduled_date=date,
-                current_scheduled_date=date,
+                scheduled_date=date,
+                done_date=None,
+            )
+            for date in to_schedule_dates
+        ]
+        db.session.bulk_save_objects(scheduled_habits)
+        db.session.commit()
+        return
+
+    def reschedule(self, from_date, ahead_window=100):
+        end_date = from_date + dt.timedelta(days=ahead_window)
+
+        if self.interval_type == "day":
+            interval_value_days = self.interval_value
+        elif self.interval_type == "week":
+            interval_value_days = self.interval_value * 7
+
+        # delete future schedule
+        ToDo.query.filter(
+            ToDo.habit_id == self.id, ToDo.scheduled_date >= from_date
+        ).delete()
+
+        to_schedule_dates = utils.get_dates(from_date, interval_value_days, end_date)
+
+        scheduled_habits = [
+            ToDo(
+                user_id=self.user_id,
+                type="habit",
+                habit_id=self.id,
+                name=self.name,
+                original_scheduled_date=date,
+                scheduled_date=date,
                 done_date=None,
             )
             for date in to_schedule_dates
@@ -74,8 +100,9 @@ class Habit(db.Model):
         return
 
 
-def default_current_scheduled_date(context):
-    return context.get_current_parameters()["original_scheduled_date"]
+def get_scheduled_date(context):
+    """Gets the original scheduled date for a given ToDo"""
+    return context.get_current_parameters()["scheduled_date"]
 
 
 class ToDo(db.Model):
@@ -85,11 +112,9 @@ class ToDo(db.Model):
     type = db.Column(db.String)  # habit or task
     name = db.Column(db.String())
     original_scheduled_date = db.Column(
-        db.Date()
+        db.Date(), default=get_scheduled_date
     )  # when it was originally scheduled for
-    current_scheduled_date = db.Column(
-        db.Date(), default=default_current_scheduled_date
-    )  # current schedule date
+    scheduled_date = db.Column(db.Date())  # current schedule date
     done_date = db.Column(db.Date())  # when it was done
     habit_id = db.Column(db.Integer(), db.ForeignKey("habits.id"))
     habit = db.relationship("Habit", back_populates="scheduled", lazy=True)

@@ -1,16 +1,10 @@
-from tests.conftest import (
-    load_response,
-    v1_url,
-    habits_url,
-    todos_url,
-    users_url,
-    keys_match,
-)
-from datetime import date, timedelta
+import datetime as dt
 
-today = str(date.today())
-tmrw = str(date.today() + timedelta(days=1))
-yday = str(date.today() - timedelta(days=1))
+from tests.conftest import habits_url, keys_match, load_response, todos_url
+
+today = str(dt.date.today())
+tmrw = str(dt.date.today() + dt.timedelta(days=1))
+yday = str(dt.date.today() - dt.timedelta(days=1))
 
 
 def test_e2e(client, new_user):
@@ -32,8 +26,7 @@ def test_e2e(client, new_user):
 
     user_id = new_user()
     user_habits_url = habits_url.replace("<user_id>", str(user_id))
-    # /habits
-    ## post new habit
+    # post new habit
     post_body = {"name": "make ippo ippo", "intervalType": "day", "intervalValue": 2}
     post_response = client.post(user_habits_url, json=post_body)
     assert post_response.status_code == 200
@@ -44,7 +37,7 @@ def test_e2e(client, new_user):
         expected_habit_keys,
     )
 
-    ## get all habits
+    # get all habits
     get_response = client.get(user_habits_url)
     assert get_response.status_code == 200
     get_response_arr = load_response(get_response)
@@ -54,9 +47,8 @@ def test_e2e(client, new_user):
 
     habit_id = post_response_dict["id"]
     user_habit_url = f"{user_habits_url}/{habit_id}"
-    # /habits/<habit_id>
 
-    ## get habit
+    # get single habit
     get_response_single = client.get(user_habit_url)
     assert get_response_single.status_code == 200
     get_response_dict = load_response(get_response_single)
@@ -65,10 +57,51 @@ def test_e2e(client, new_user):
         expected_habit_keys,
     )
 
-    ## patch habit
+    # patch habit
     patch_response = client.patch(user_habit_url, json={"intervalValue": 4})
     assert patch_response.status_code == 204
     get_response_single_patch = client.get(user_habit_url)
     assert get_response_single_patch.status_code == 200
     get_response_patch_dict = load_response(get_response_single_patch)
     assert get_response_patch_dict["intervalValue"] == 4
+
+
+def test_patch_habit_interval_value(client, new_user):
+    """When the interval value is updated, the habit should be rescheduled."""
+    user_id = new_user()
+    habit = {
+        "name": "habitty",
+        "intervalType": "day",
+        "intervalValue": 1,
+        "startDate": today,
+    }
+    user_habits_url = habits_url.replace("<user_id>", str(user_id))
+    post_response = client.post(user_habits_url, json=habit)
+
+    user_todos_url = todos_url.replace("<user_id>", str(user_id))
+
+    user_habit_url = f"{user_habits_url}/{load_response(post_response)['id']}"
+    client.patch(user_habit_url, json={"intervalValue": 2})
+    get_todos_response = client.get(user_todos_url + "?horizon=1")
+    assert len(get_todos_response.get_json()[tmrw]) == 0
+    assert len(get_todos_response.get_json()[today]) == 1
+
+
+def test_patch_habit_name(client, new_user):
+    """When the name is updated, the name should be update in todos too."""
+    user_id = new_user()
+    habit = {
+        "name": "habitty",
+        "intervalType": "day",
+        "intervalValue": 1,
+        "startDate": today,
+    }
+    user_habits_url = habits_url.replace("<user_id>", str(user_id))
+    post_response = client.post(user_habits_url, json=habit)
+
+    user_todos_url = todos_url.replace("<user_id>", str(user_id))
+    new_name = "hobbity"
+    user_habit_url = f"{user_habits_url}/{load_response(post_response)['id']}"
+    client.patch(user_habit_url, json={"name": new_name})
+    get_todos_response = client.get(user_todos_url + "?horizon=1")
+    assert get_todos_response.get_json()[today][0]["name"] == new_name

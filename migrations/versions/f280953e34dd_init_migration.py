@@ -1,16 +1,15 @@
-"""add relationship
+"""init migration
 
-Revision ID: f09c865ad2ba
-Revises: 
-Create Date: 2023-06-25 16:44:59.480365
+Revision ID: f280953e34dd
+Revises:
+Create Date: 2023-07-14 18:40:32.905708
 
 """
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "f09c865ad2ba"
+revision = "f280953e34dd"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -50,7 +49,7 @@ def upgrade():
         sa.Column("type", sa.String(), nullable=True),
         sa.Column("name", sa.String(), nullable=True),
         sa.Column("original_scheduled_date", sa.Date(), nullable=True),
-        sa.Column("current_scheduled_date", sa.Date(), nullable=True),
+        sa.Column("scheduled_date", sa.Date(), nullable=True),
         sa.Column("done_date", sa.Date(), nullable=True),
         sa.Column("habit_id", sa.Integer(), nullable=True),
         sa.Column("user_id", sa.Integer(), nullable=True),

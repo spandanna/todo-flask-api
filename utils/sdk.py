@@ -1,6 +1,7 @@
-import requests
-import json
 import datetime as dt
+import json
+
+import requests
 
 
 class ToDoApp:
@@ -12,7 +13,7 @@ class ToDoApp:
         self,
         user_id: int = None,
         name: str = None,
-        url: str = "http://192.168.0.4:5000",
+        url: str = None,
         horizon: int = 7,
     ):
         if user_id:
@@ -24,7 +25,7 @@ class ToDoApp:
             self.name = name
 
         self.horizon = horizon
-        self.url = url
+        self.url = url or self.default_url
         self.api_url = f"{self.url}/api/v1"
         self.users_url = f"{self.api_url}/users"
 
@@ -35,6 +36,7 @@ class ToDoApp:
         self._set_habits()
 
         self.todos_url = f"{self.user_url}/todos"
+        self.todos = None
         self._set_todos()
 
         self._set_user()
@@ -99,7 +101,7 @@ class ToDoApp:
     def new_task(self, name: str, do_date: str = None):
         if not do_date:
             do_date = str(dt.date.today())
-        body = {"name": name, "originalScheduledDate": do_date, "currentScheduledDate": do_date, "type": "task"}
+        body = {"name": name, "scheduledDate": do_date, "type": "task"}
         response = requests.post(self.todos_url, json=body)
         response.raise_for_status()
         self._set_todos()
@@ -121,4 +123,5 @@ class ToDoApp:
         response = requests.post(self.habits_url, json=body)
         response.raise_for_status()
         self._set_todos()
+        self._set_habits()
         return None
