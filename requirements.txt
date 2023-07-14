@@ -8,3 +8,4 @@ inflection
 flask-marshmallow
 marshmallow-sqlalchemy
 marshmallow
+python-dotenv

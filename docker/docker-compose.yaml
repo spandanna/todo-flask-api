@@ -1,0 +1,10 @@
+services:
+  api:
+    build:
+      context: "../"
+      dockerfile: docker/Dockerfile
+    restart: always
+    ports:
+      - 8080:5000
+    volumes:
+      - "../data:/code/data"

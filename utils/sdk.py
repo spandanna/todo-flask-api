@@ -5,7 +5,7 @@ import requests
 
 
 class ToDoApp:
-    default_url = "http://192.168.0.4:5000"
+    default_url = "http://127.0.0.1:8080"
     default_api_url = f"{default_url}/api/v1"
     default_users_url = f"{default_api_url}/users"
 
@@ -25,7 +25,7 @@ class ToDoApp:
             self.name = name
 
         self.horizon = horizon
-        self.url = url or self.default_url
+        self.url = url if url else self.default_url
         self.api_url = f"{self.url}/api/v1"
         self.users_url = f"{self.api_url}/users"
 
