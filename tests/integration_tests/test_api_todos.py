@@ -1,6 +1,5 @@
 from datetime import date, timedelta
 
-from db.database import Habit
 from tests.conftest import habits_url, load_response, todos_url
 
 today = str(date.today())
@@ -21,14 +20,7 @@ def test_e2e(client, new_user_with_habits, _app):
     habits = load_response(response)
     assert len(habits) > 0
 
-    # schedule the habits (as it's not done in pytest fixture)
-    first_habit_id = habits[0]["id"]
-    with _app.app_context():
-        for habit in habits:
-            Habit.query.get(habit["id"]).schedule()
-
     # assert all habits are scheduled correctly by GET to todos
-
     user_todos_url = todos_url.replace("<user_id>", str(user_id))
     response = client.get(user_todos_url)
     assert response.status_code == 200
@@ -39,6 +31,7 @@ def test_e2e(client, new_user_with_habits, _app):
 
     # update done and current schedule date to yday
     # this makes one less habit scheduled for today
+    first_habit_id = habits[0]["id"]
     response = client.patch(
         f"{user_todos_url}/{first_habit_id}",
         json={"scheduledDate": yday, "doneDate": yday},

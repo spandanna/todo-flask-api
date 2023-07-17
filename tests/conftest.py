@@ -70,7 +70,7 @@ def make_habit_dicts(_uid, n: int = 3, contents: List[tuple] = None):
         start_date = dt.date.today() - dt.timedelta(days=1)
         contents = [
             # TODO make random
-            ("habit rabbit", "day", "3", _uid, start_date)
+            ("habit rabbit", "day", 3, _uid, start_date)
             for _ in range(n)
         ]
     return [
@@ -97,10 +97,13 @@ def new_user_with_habits(_app, new_user):
                 habit_dicts = make_habit_dicts(_uid=_uid)
             else:
                 habit_dicts = [dict(d, user_id=_uid) for d in habit_dicts]
-            habits = [Habit(**habit_dict) for habit_dict in habit_dicts]
 
+            habits = [Habit(**habit_dict) for habit_dict in habit_dicts]
             db.session.bulk_save_objects(habits)
             db.session.commit()
+
+            for habit in Habit.query.filter(Habit.user_id == _uid).all():
+                habit.schedule()
         return _uid
 
     yield inner
