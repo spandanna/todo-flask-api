@@ -19,7 +19,7 @@ class HabitSchema(Schema):
     created_at = fields.DateTime(data_key="createdAt", dump_only=True)
     start_date = fields.Date(data_key="startDate", dump_default=None)
     end_date = fields.Date(data_key="endDate", dump_default=None)
-
+    completion_rate = fields.Float(data_key="completionRate", dump_only=True)
     interval_type = fields.String(data_key="intervalType")
     interval_value = fields.Integer(data_key="intervalValue")
 

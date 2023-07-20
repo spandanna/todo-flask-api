@@ -105,3 +105,12 @@ def test_patch_habit_name(client, new_user):
     client.patch(user_habit_url, json={"name": new_name})
     get_todos_response = client.get(user_todos_url + "?horizon=1")
     assert get_todos_response.get_json()[today][0]["name"] == new_name
+
+
+def test_get_completion_rate(client, new_user_with_habits):
+    uid = new_user_with_habits()
+    response = client.get(
+        f'{habits_url.replace("<user_id>", str(uid))}?get-completion-rate=1'
+    )
+    loaded = load_response(response)
+    assert isinstance(loaded[0].get("completionRate"), float)

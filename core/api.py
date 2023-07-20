@@ -5,6 +5,7 @@ from flask_restx import Api, Resource
 
 from db.database import Habit, ToDo, User, db
 from db.schemas import HabitSchema, ToDoSchema, UserSchema, dump_todos, habit_schema
+from utils import db_utils
 from utils.scheduler import Scheduler
 
 blueprint = Blueprint("app", __name__)
@@ -55,7 +56,17 @@ class user(Resource):
 @api.route("/users/<int:user_id>/habits")
 class habits(Resource):
     def get(self, user_id):
+        get_completion_rate = request.values.get("get-completion-rate")
+        completion_rate_window = 7
+
         habits = Habit.query.filter(Habit.user_id == user_id).all()
+        if get_completion_rate:
+            for habit in habits:
+                habit.completion_rate = db_utils.get_completion_rate(
+                    habit.id,
+                    dt.date.today() - dt.timedelta(days=completion_rate_window),
+                    dt.date.today(),
+                )
         return HabitSchema(many=True).dumps(habits)
 
     def delete(self, user_id):
