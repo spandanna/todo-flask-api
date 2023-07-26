@@ -56,11 +56,10 @@ class user(Resource):
 @api.route("/users/<int:user_id>/habits")
 class habits(Resource):
     def get(self, user_id):
-        get_completion_rate = request.values.get("get-completion-rate")
-        completion_rate_window = 7
+        completion_rate_window = int(request.values.get("completion-rate-window", 0))
 
         habits = Habit.query.filter(Habit.user_id == user_id).all()
-        if get_completion_rate:
+        if completion_rate_window != 0:
             for habit in habits:
                 habit.completion_rate = db_utils.get_completion_rate(
                     habit.id,
@@ -96,16 +95,28 @@ class habit(Resource):
 
     def patch(self, user_id, habit_id):
         body = request.get_json()
-        updates = HabitSchema(partial=True).load(body)
+        updates = HabitSchema(
+            partial=True,
+            only=[
+                "name",
+                "end_date",
+                "completion_rate_target",
+                "interval_type",
+                "interval_value",
+            ],
+        ).load(body)
         Habit.query.filter(Habit.id == habit_id).update(updates)
         db.session.commit()
         if updates.get("interval_value"):
             Habit.query.get(habit_id).reschedule(from_date=dt.date.today())
-        elif updates.get("name"):
-            ToDo.query.filter(ToDo.habit_id == habit_id).update(
-                {"name": updates.get("name")}
-            )
-            db.session.commit()
+        # elif updates.get("name"):
+        #     ToDo.query.filter(ToDo.habit_id == habit_id).update(
+        #         {"name": updates.get("name")}
+        #     )
+        #     db.session.commit()
+        ToDo.query.filter(ToDo.habit_id == habit_id).update(**updates)
+        db.session.commit()
+        # TODO make patch available for all safe attrs
         return make_response("", 204)
 
 

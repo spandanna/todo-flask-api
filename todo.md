@@ -1,5 +1,5 @@
 todo list for the todo list
-- view performance for habits n_completed / n_scheduled
+- *view performance for habits n_completed / n_scheduled*
 - set targets for habits e.g. 80% completion
 - don't schedule x on the same day as y
 - prioritise x over y based on target completion

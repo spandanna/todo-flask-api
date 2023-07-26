@@ -36,9 +36,11 @@ class Habit(db.Model):
     # or
     repetition_type = db.Column(db.String())  # e.g. times per_week per_month
     repetition_value = db.Column(db.Integer())  # e.g. 3
+    completion_rate_target = db.Column(db.Numeric())  # between 0 and 1
 
     user_id = db.Column(db.Integer(), db.ForeignKey("users.id"))
     user = db.relationship("User", back_populates="habits", lazy=True)
+
     scheduled = db.relationship("ToDo", back_populates="habit", lazy=True)
 
     def schedule(self, ahead_window=100):

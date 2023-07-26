@@ -110,7 +110,7 @@ def test_patch_habit_name(client, new_user):
 def test_get_completion_rate(client, new_user_with_habits):
     uid = new_user_with_habits()
     response = client.get(
-        f'{habits_url.replace("<user_id>", str(uid))}?get-completion-rate=1'
+        f'{habits_url.replace("<user_id>", str(uid))}?completion-rate-window=7'
     )
     loaded = load_response(response)
     assert isinstance(loaded[0].get("completionRate"), float)
