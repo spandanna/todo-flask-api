@@ -17,14 +17,14 @@ todos_url = f"{user_url}/todos"
 
 
 @pytest.fixture
-def _app():
+def app_fixture():
     app = create_app("config.TestConfig")
     return app
 
 
 @pytest.fixture
-def client(_app):
-    app = _app
+def client(app_fixture):
+    app = app_fixture
     yield app.test_client()
     with app.app_context():
         # lazy cleanup to make sure test data isn't left over
@@ -43,11 +43,11 @@ def keys_match(actual_keys, expected_keys):
 
 
 @pytest.fixture
-def new_user(_app):
+def new_user(app_fixture):
     _uid = None
 
     def inner(name: str = None):
-        with _app.app_context():
+        with app_fixture.app_context():
             nonlocal _uid
             user = User(
                 name=name
@@ -59,7 +59,7 @@ def new_user(_app):
         return _uid
 
     yield inner
-    with _app.app_context():
+    with app_fixture.app_context():
         _user = User.query.get(_uid)
         db.session.delete(_user)
         db.session.commit()
@@ -86,13 +86,18 @@ def make_habit_dicts(_uid, n: int = 3, contents: List[tuple] = None):
 
 
 @pytest.fixture
-def new_user_with_habits(_app, new_user):
+def new_user_with_habits(app_fixture, new_user):
+    """
+    Fixture to populate the database with a new user and habits.
+    Fixture can be used in a test to populate the user with inputted habits.
+    Returns user ID.
+    """
     _uid = None
 
     def inner(name: str = None, habit_dicts: list = None):
         nonlocal _uid
         _uid = new_user(name)
-        with _app.app_context():
+        with app_fixture.app_context():
             if not habit_dicts:
                 habit_dicts = make_habit_dicts(_uid=_uid)
             else:

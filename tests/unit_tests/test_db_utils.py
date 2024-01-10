@@ -6,7 +6,7 @@ from utils.db_utils import get_completion_rate
 
 def test_get_completion_rate(new_user_with_habits, _app):
     """
-    Tests the get_completion_rate returns floats and expected values.
+    Tests that get_completion_rate returns floats and expected values.
     """
     new_user_with_habits(
         habit_dicts=[

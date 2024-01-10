@@ -6,13 +6,17 @@ from db.database import ToDo
 
 
 class Scheduler:
-    def __init__(self, user_id, db, end_date, today=None):
-        self.end_date = end_date
+
+    look_ahead_window = 60
+
+    def __init__(self, user_id, db, end_date: dt.date = None, today: dt.date = None):
+        self.today = today or dt.date.today()
+        self.end_date = end_date or today + dt.timedelta(self.look_ahead_window)
         self.user_id = user_id
         self.db = db
         self.todos = []
         self.habits = []
-        self.today = today if today else dt.date.today()
+
         self.scheduling_types = {
             "intervalDay": ("intervalType", "day"),
             "intervalWeek": ("intervalType", "weekly"),
@@ -23,14 +27,19 @@ class Scheduler:
     def reschedule(self):
         self._reschedule_habits()
         self._reschedule_tasks()
-        self.set_todos()
+        self.reset_todos()
 
-    def set_todos(self):
-        self.todos = ToDo.query.filter(
+    def reset_todos(self):
+        todos = ToDo.query.filter(
             ToDo.scheduled_date >= self.today,
             ToDo.scheduled_date <= self.end_date,
             ToDo.user_id == self.user_id,
         ).all()
+
+        self.set_todos(todos)
+
+    def set_todos(self, todos):
+        self.todos = todos
 
     def get_todos(self):
         return self.todos

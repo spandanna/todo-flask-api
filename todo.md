@@ -6,3 +6,6 @@ todo list for the todo list
 - create milestone for habits
 - add time estimate for each task/habit
 - don't schedule more than x mins a day
+- set rule to not schedule more often than every x days
+- flag to say that you don't want to do it
+- don't schedule on this day
