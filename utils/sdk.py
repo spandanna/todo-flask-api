@@ -63,7 +63,6 @@ class ToDoApp:
 
     def _set_user(self):
         self.user = self._get_user()
-        return None
 
     def _get_habits(self):
         response = requests.get(self.habits_url)
@@ -72,7 +71,6 @@ class ToDoApp:
 
     def _set_habits(self):
         self.habits = self._get_habits()
-        return None
 
     def _get_todos(self):
         response = requests.get(f"{self.todos_url}?horizon={self.horizon}")
@@ -81,7 +79,6 @@ class ToDoApp:
 
     def _set_todos(self):
         self.todos = self._get_todos()
-        return None
 
     def set_complete(self, todo_id: int = None, date: str = None, name: str = None):
         if todo_id:
@@ -96,7 +93,6 @@ class ToDoApp:
         response = requests.patch(url, json={"doneDate": date})
         response.raise_for_status()
         self._set_todos()
-        return None
 
     def new_task(self, name: str, do_date: str = None):
         if not do_date:
@@ -105,7 +101,6 @@ class ToDoApp:
         response = requests.post(self.todos_url, json=body)
         response.raise_for_status()
         self._set_todos()
-        return None
 
     def new_habit(
         self,
@@ -124,4 +119,3 @@ class ToDoApp:
         response.raise_for_status()
         self._set_todos()
         self._set_habits()
-        return None

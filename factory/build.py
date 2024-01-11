@@ -7,11 +7,12 @@ def create_app(app_config) -> Flask:
     app = Flask(__name__)
     app.config.from_object(app_config)
 
-    from core.api import blueprint as api
+    from core.root import root_blueprint
+    from core.users import users_blueprint
 
-    app.register_blueprint(api, url_prefix="/api/v1")
+    app.register_blueprint(users_blueprint, url_prefix="/api/v1")
+    app.register_blueprint(root_blueprint, url_prefix="/api")
 
     db.init_app(app)
     migrate.init_app(app, db)
-
     return app

@@ -8,15 +8,15 @@ from db.schemas import HabitSchema, ToDoSchema, UserSchema, dump_todos, habit_sc
 from utils import db_utils
 from utils.scheduler import Scheduler
 
-blueprint = Blueprint("app", __name__)
-api = Api(blueprint)
+users_blueprint = Blueprint("users_blueprint", __name__)
+api = Api(users_blueprint, doc="docs")
 
 
 @api.route("/users")
 class users(Resource):
     def get(self):
         users = User.query.all()
-        return UserSchema(many=True).dumps(users)
+        return make_response(UserSchema(many=True).dumps(users), 200)
 
     def post(self):
         body = request.get_json()
@@ -69,9 +69,6 @@ class habits(Resource):
                 )
         return HabitSchema(many=True).dumps(habits)
 
-    def delete(self, user_id):
-        return "DELETE"
-
     def post(self, user_id):
         body = request.get_json()
         data = habit_schema.load(body)
@@ -81,18 +78,15 @@ class habits(Resource):
         habit.schedule()
         return habit_schema.dumps(habit)
 
+    def delete(self, user_id):
+        return "DELETE"
+
 
 @api.route("/users/<int:user_id>/habits/<int:habit_id>")
 class habit(Resource):
     def get(self, user_id, habit_id):
         habit = Habit.query.get(habit_id)
         return HabitSchema().dumps(habit)
-
-    def delete(self, user_id, habit_id):
-        habit = Habit.query.get(habit_id)
-        db.session.delete(habit)
-        db.session.commit()
-        return make_response("", 201)
 
     def patch(self, user_id, habit_id):
         body = request.get_json()
@@ -107,6 +101,12 @@ class habit(Resource):
             )
             db.session.commit()
         return make_response("", 204)
+
+    def delete(self, user_id, habit_id):
+        habit = Habit.query.get(habit_id)
+        db.session.delete(habit)
+        db.session.commit()
+        return make_response("", 201)
 
 
 @api.route("/users/<int:user_id>/todos")
@@ -143,11 +143,10 @@ class todo(Resource):
         return make_response("", 204)
 
 
-@api.route("/delete")
-class deleteall(Resource):
-    def delete(self):
-        db.session.query(Habit).delete()
-        db.session.query(ToDo).delete()
-
-        db.session.commit()
-        return make_response("", 201)
+# @users_api.route("/delete")
+# class deleteall(Resource):
+#     def delete(self):
+#         db.session.query(Habit).delete()
+#         db.session.query(ToDo).delete()
+#         db.session.commit()
+#         return make_response("", 201)
