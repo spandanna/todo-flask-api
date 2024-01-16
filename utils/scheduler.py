@@ -10,10 +10,12 @@ class Scheduler:
     look_ahead_window = 60
 
     def __init__(self, user_id, db, end_date: dt.date = None, today: dt.date = None):
-        self.today = today or dt.date.today()
-        self.end_date = end_date or today + dt.timedelta(self.look_ahead_window)
         self.user_id = user_id
         self.db = db
+
+        self.today = today or dt.date.today()
+        self.end_date = end_date or self.today + dt.timedelta(self.look_ahead_window)
+
         self.todos = []
         self.habits = []
 

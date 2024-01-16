@@ -1,7 +1,7 @@
 flask
 requests
 pytest
-Flask-SQLAlchemy
+Flask-SQLAlchemy>=2.0
 Flask-Migrate
 Flask-RestX
 inflection

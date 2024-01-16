@@ -60,7 +60,7 @@ def new_user(app_fixture):
 
     yield inner
     with app_fixture.app_context():
-        _user = User.query.get(_uid)
+        _user = db.session.get(User, _uid)
         db.session.delete(_user)
         db.session.commit()
 

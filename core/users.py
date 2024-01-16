@@ -141,12 +141,3 @@ class todo(Resource):
         ToDo.query.filter(ToDo.id == todo_id, ToDo.user_id == user_id).update(updates)
         db.session.commit()
         return make_response("", 204)
-
-
-# @users_api.route("/delete")
-# class deleteall(Resource):
-#     def delete(self):
-#         db.session.query(Habit).delete()
-#         db.session.query(ToDo).delete()
-#         db.session.commit()
-#         return make_response("", 201)

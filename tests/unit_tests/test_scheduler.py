@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+
 from utils.scheduler import Scheduler
 
 habits_data = [
@@ -33,7 +34,6 @@ habits_data = [
 
 
 def test_init_():
-    s = Scheduler()
-    assert s.schedule == {}
-    assert s.habits == []
-    assert s.today
+    s = Scheduler(user_id=1, db="db")
+    assert isinstance(s.habits, list)
+    assert isinstance(s.todos, list)

@@ -11,7 +11,7 @@ migrate = Migrate()
 
 class User(db.Model):
     __tablename__ = "users"
-    id = db.Column(db.Integer(), primary_key=True)
+    id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
     name = db.Column(db.String())
     created_at = db.Column(db.DateTime(), default=dt.datetime.utcnow)
     habits = db.relationship("Habit", back_populates="user", lazy=True)
@@ -20,7 +20,7 @@ class User(db.Model):
 
 class Habit(db.Model):
     __tablename__ = "habits"
-    id = db.Column(db.Integer(), primary_key=True)
+    id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
     name = db.Column(db.String())
     created_at = db.Column(db.DateTime(), default=dt.datetime.utcnow)
     start_date = db.Column(db.Date(), default=dt.date.today)
@@ -107,7 +107,7 @@ def get_scheduled_date(context):
 
 class ToDo(db.Model):
     __tablename__ = "todos"
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
     type = db.Column(db.String)  # habit or task
     name = db.Column(db.String())

@@ -7,7 +7,7 @@ tmrw = str(date.today() + timedelta(days=1))
 yday = str(date.today() - timedelta(days=1))
 
 
-def test_e2e(client, new_user_with_habits, _app):
+def test_e2e(client, new_user_with_habits, app_fixture):
     """
     Tests end to end journey of the /todos endpoint.
     **
