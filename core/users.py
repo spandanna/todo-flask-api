@@ -16,7 +16,7 @@ api = Api(users_blueprint, doc="docs")
 class users(Resource):
     def get(self):
         users = User.query.all()
-        return make_response(UserSchema(many=True).dumps(users), 200)
+        return make_response(UserSchema(many=True).dump(users), 200)
 
     def post(self):
         body = request.get_json()
@@ -25,7 +25,7 @@ class users(Resource):
 
         db.session.add(user)
         db.session.commit()
-        return UserSchema().dumps(user)
+        return UserSchema().dump(user)
 
     def delete(self):
         db.session.query(User).delete()
@@ -37,7 +37,7 @@ class users(Resource):
 class user(Resource):
     def get(self, user_id):
         user = User.query.get(user_id)
-        return UserSchema().dumps(user) if user else make_response("", 404)
+        return UserSchema().dump(user) if user else make_response("", 404)
 
     def patch(self, user_id):
         body = request.get_json()
@@ -67,7 +67,7 @@ class habits(Resource):
                     dt.date.today() - dt.timedelta(days=completion_rate_window),
                     dt.date.today(),
                 )
-        return HabitSchema(many=True).dumps(habits)
+        return HabitSchema(many=True).dump(habits)
 
     def post(self, user_id):
         body = request.get_json()
@@ -76,7 +76,7 @@ class habits(Resource):
         db.session.add(habit)
         db.session.commit()
         habit.schedule()
-        return habit_schema.dumps(habit)
+        return habit_schema.dump(habit)
 
     def delete(self, user_id):
         return "DELETE"
@@ -86,7 +86,7 @@ class habits(Resource):
 class habit(Resource):
     def get(self, user_id, habit_id):
         habit = Habit.query.get(habit_id)
-        return HabitSchema().dumps(habit)
+        return HabitSchema().dump(habit)
 
     def patch(self, user_id, habit_id):
         body = request.get_json()

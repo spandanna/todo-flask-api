@@ -1,5 +1,4 @@
 import datetime as dt
-import json
 import random
 import string
 from typing import List
@@ -26,16 +25,10 @@ def app_fixture():
 def client(app_fixture):
     app = app_fixture
     yield app.test_client()
-    with app.app_context():
-        # lazy cleanup to make sure test data isn't left over
-        db.session.query(Habit).delete()
-        db.session.query(ToDo).delete()
-        db.session.query(User).delete()
-        db.session.commit()
 
 
 def load_response(response):
-    return json.loads(response.get_json())
+    return response.get_json()
 
 
 def keys_match(actual_keys, expected_keys):
@@ -60,6 +53,9 @@ def new_user(app_fixture):
 
     yield inner
     with app_fixture.app_context():
+
+        Habit.query.filter(Habit.user_id == _uid).delete()
+        ToDo.query.filter(ToDo.user_id == _uid).delete()
         _user = db.session.get(User, _uid)
         db.session.delete(_user)
         db.session.commit()
